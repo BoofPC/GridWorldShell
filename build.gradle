@@ -1,0 +1,28 @@
+plugins {
+    id 'eclipse'
+    id 'java'
+    id 'io.franzbecker.gradle-lombok' version '1.6'
+}
+
+repositories {
+    jcenter()
+    flatDir {
+        dirs 'libs'
+    }
+}
+
+lombok {
+    version = '1.16.8'
+    sha256 = 'fe32b29b7b33eb2b19866cbc5345c59c9984a6036cc396856a04c0d09f99ea68'
+}
+
+dependencies {
+    compile name: 'gridworld'
+
+    testCompile 'junit:junit:4.12'
+}
+
+jar {
+    exclude 'CashGrabRunner*'
+    // exclude 'cashgrab/*'
+}
