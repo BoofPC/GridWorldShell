@@ -4,6 +4,8 @@ plugins {
     id 'io.franzbecker.gradle-lombok' version '1.6'
 }
 
+import io.franzbecker.gradle.lombok.task.DelombokTask
+
 repositories {
     jcenter()
     flatDir {
@@ -28,5 +30,17 @@ jar {
 }
 
 javadoc {
+    source = 'src/delombok/java'
+    exclude '**/*.gif'
     exclude 'CashGrabRunner*'
 }
+
+task delombok(type: DelombokTask) {
+    args("src/main/java", "-d", "src/delombok/java")
+}
+
+task delombokHelp(type: DelombokTask) {
+    args "--help"
+}
+
+javadoc.dependsOn delombok

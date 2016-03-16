@@ -29,11 +29,12 @@ public class Actions {
   @Data
   public class MessageAction implements Action {
     /**
-     * Either<shouting range, Either<polar offset, id> of recipient>
+     * {@code Either<}shouting range{@code , Either<}polar offset{@code , }id{@code > }of recipient
+     * {@code >}
      */
     private final Either<Double, Either<Integer, Pair<Double, Double>>> recipient;
     /**
-     * TODO
+     * The message to send.
      */
     private final Serializable message;
 
