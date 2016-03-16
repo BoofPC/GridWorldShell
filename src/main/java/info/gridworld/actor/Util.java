@@ -136,6 +136,9 @@ public class Util {
     /**
      * Apply a <code>BiFunction</code> using a <code>Pair</code>'s values as arguments.
      * 
+     * @param <A> the first item in the pair
+     * @param <B> the second item in the pair
+     * @param <C> what's returned from the function
      * @param p the values to be used
      * @param fun the function to apply
      * @return the application of <code>xs</code> to <code>fun</code>
@@ -144,14 +147,6 @@ public class Util {
       return fun.apply(p.getKey(), p.getValue());
     }
 
-    /**
-     * Thread a <code>Pair</code> of <code>Function</code>s
-     * 
-     * @param p
-     * @param keyFun
-     * @param valFun
-     * @return
-     */
     public <A, B> Pair<B, B> thread(Pair<A, A> p, Function<A, B> fun) {
       return thread(p, Pairs.dup(fun));
     }

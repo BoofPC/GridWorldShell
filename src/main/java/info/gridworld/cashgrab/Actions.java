@@ -16,9 +16,18 @@ import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class Actions {
+  /**
+   * The {@code CollectCoinAction} class represents collection of a nearby coin in the world.
+   */
   @Data
   public class CollectCoinAction implements Action {
+    /**
+     * The distance away of the coin.
+     */
     private final double distance;
+    /**
+     * The direction of the coin from the actor's viewpoint.
+     */
     private final double direction;
 
     @Override
@@ -90,9 +99,18 @@ public class Actions {
       };
     }
   }
+  /**
+   * The {@code ConsumeAction} class represents consumption of another actor in the world.
+   */
   @Data
   public class ConsumeAction implements Action {
+    /**
+     * The distance away of the prey.
+     */
     private final double distance;
+    /**
+     * The direction of the prey from the actor's viewpoint.
+     */
     private final double direction;
 
     @Override

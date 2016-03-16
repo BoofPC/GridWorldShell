@@ -22,12 +22,19 @@ import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class Actions {
+  /**
+   * The {@code MessageAction} class represents the act of sending a message to another actor in the
+   * world.
+   */
   @Data
   public class MessageAction implements Action {
     /**
      * Either<shouting range, Either<polar offset, id> of recipient>
      */
     private final Either<Double, Either<Integer, Pair<Double, Double>>> recipient;
+    /**
+     * TODO
+     */
     private final Serializable message;
 
     @Override
@@ -104,7 +111,6 @@ public class Actions {
             watchman.report(report.apply(recipient.getLeftValue()));
           }
         } else {
-          // shout MessageReportEvent to everybody in earshot
           final double shoutRange = Math.min(scope.getLeftValue(), maxDist);
           final Stream<Actor> listeners = Util.actorsInRadius(that, shoutRange);
           listeners.filter(act -> act instanceof Shell).map(s -> (Shell) s)
@@ -113,8 +119,14 @@ public class Actions {
       };
     }
   }
+  /**
+   * The {@code MessageAction} class represents the act of moving forward.
+   */
   @Data
   public class MoveAction implements Action {
+    /**
+     * The distance to travel.
+     */
     private final int distance;
 
     @Override
@@ -142,8 +154,14 @@ public class Actions {
       };
     }
   }
+  /**
+   * The {@code MessageAction} class represents the act of turning.
+   */
   @Value
   public class TurnAction implements Action {
+    /**
+     * The angle to turn, in eighths of a turn.
+     */
     private final int angle;
 
     @Override
@@ -159,8 +177,14 @@ public class Actions {
       };
     }
   }
+  /**
+   * The {@code MessageAction} class represents the act of chaning color.
+   */
   @Data
   public class ColorAction implements Action {
+    /**
+     * The color to change to.
+     */
     private final Color color;
 
     @Override

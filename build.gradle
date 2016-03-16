@@ -26,3 +26,7 @@ jar {
     exclude 'CashGrabRunner*'
     // exclude 'cashgrab/*'
 }
+
+javadoc {
+    exclude 'CashGrabRunner*'
+}
