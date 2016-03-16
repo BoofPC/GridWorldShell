@@ -44,3 +44,9 @@ task delombokHelp(type: DelombokTask) {
 }
 
 javadoc.dependsOn delombok
+
+task javadocZip(type: Zip, dependsOn: javadoc) {
+    from 'build/docs/javadoc'
+    appendix = 'javadoc'
+    extension = 'jar'
+}
