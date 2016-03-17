@@ -2,6 +2,7 @@ plugins {
     id 'eclipse'
     id 'java'
     id 'io.franzbecker.gradle-lombok' version '1.6'
+    id 'distribution'
 }
 
 import io.franzbecker.gradle.lombok.task.DelombokTask
@@ -53,3 +54,17 @@ task javadocZip(type: Zip, dependsOn: javadoc) {
     appendix = 'javadoc'
     extension = 'jar'
 }
+
+distributions {
+    main {
+        contents {
+            from({ 'build/libs/gridworld-shell.jar' },
+                 { 'build/distributions/gridworld-shell-javadoc.jar' },
+                 { 'src/delombok/java/CashGrabRunner.java' },
+                 { 'src/delombok/java/info/gridworld/cashgrab/CalebBug.java' })
+        }
+    }
+}
+
+distZip.dependsOn(delombok, javadocZip)
+distTar.dependsOn(delombok, javadocZip)
