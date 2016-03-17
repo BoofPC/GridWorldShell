@@ -29,12 +29,16 @@ public class Actions {
   @Data
   public class MessageAction implements Action {
     /**
-     * {@code Either<}shouting range{@code , Either<}polar offset{@code , }id{@code > }of recipient
-     * {@code >}
+     * If shouting, a left of the range. If directed to a specific actor, then a right of either: a
+     * left polar offset, or an id.
+     * 
+     * @return how to find the recipient(s)
      */
     private final Either<Double, Either<Integer, Pair<Double, Double>>> recipient;
     /**
      * The message to send.
+     * 
+     * @return the message
      */
     private final Serializable message;
 

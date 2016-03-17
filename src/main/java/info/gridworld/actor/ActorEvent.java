@@ -25,22 +25,32 @@ public class ActorEvent extends EventObject {
   public static class ActorInfo {
     /**
      * The unique identifier of this actor.
+     * 
+     * @return the actor's unique identifier
      */
     Integer id;
     /**
      * The type of this actor.
+     * 
+     * @return the actor's type
      */
     String type;
     /**
      * The distance away from the reciever's perspective.
+     * 
+     * @return the actor's distance away
      */
     Double distance;
     /**
      * The direction offset from the reciever's perspective.
+     * 
+     * @return the offset of the actor's direction
      */
     Double direction;
     /**
      * The color of the actor from the reciever's perspective.
+     * 
+     * @return the actor's color
      */
     Color color;
   }

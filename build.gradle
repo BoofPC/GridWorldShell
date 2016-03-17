@@ -33,6 +33,9 @@ javadoc {
     source = 'src/delombok/java'
     exclude '**/*.gif'
     exclude 'CashGrabRunner*'
+    options {
+        noQualifiers('java.lang', 'java.io')
+    }
 }
 
 task delombok(type: DelombokTask) {

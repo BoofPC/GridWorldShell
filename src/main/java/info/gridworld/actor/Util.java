@@ -1,11 +1,6 @@
 package info.gridworld.actor;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.Serializable;
-import java.nio.channels.Channels;
-import java.nio.channels.Pipe;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -20,7 +15,6 @@ import info.gridworld.grid.Location;
 import info.gridworld.world.World;
 import javafx.util.Pair;
 import lombok.AccessLevel;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -75,24 +69,6 @@ public class Util {
       } else {
         ifLeft.accept((L) value);
       }
-    }
-  }
-  @Data
-  public class PipeStream {
-    private final Pipe pipe;
-    private final InputStream in;
-    private final OutputStream out;
-
-    public PipeStream() {
-      Pipe pipe_ = null;
-      try {
-        pipe_ = Pipe.open();
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-      pipe = pipe_;
-      in = Channels.newInputStream(pipe.source());
-      out = Channels.newOutputStream(pipe.sink());
     }
   }
 
