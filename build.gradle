@@ -35,21 +35,21 @@ javadoc {
     exclude '**/*.gif'
     exclude 'CashGrabRunner*'
     options {
-        noQualifiers('java.lang', 'java.io')
+        links "http://docs.oracle.com/javase/8/docs/api/"
     }
 }
 
 task delombok(type: DelombokTask) {
-    args("src/main/java", "-d", "src/delombok/java")
+    args "src/main/java", '-d', "src/delombok/java"
 }
 
 task delombokHelp(type: DelombokTask) {
-    args "--help"
+    args '--help'
 }
 
 javadoc.dependsOn delombok
 
-task javadocZip(type: Zip, dependsOn: javadoc) {
+task javadocJar(type: Zip, dependsOn: javadoc) {
     from 'build/docs/javadoc'
     appendix = 'javadoc'
     extension = 'jar'
@@ -66,5 +66,4 @@ distributions {
     }
 }
 
-distZip.dependsOn(delombok, javadocZip)
-distTar.dependsOn(delombok, javadocZip)
+[distZip, distTar]*.dependsOn(jar, delombok, javadocJar)

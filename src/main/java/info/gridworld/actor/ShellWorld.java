@@ -22,15 +22,15 @@ public class ShellWorld extends ActorWorld {
       this.world = world;
     }
 
-    public Watchman addImpl(Class<? extends ReportEvent> clazz,
-      BiConsumer<Watchman, ReportEvent> impl) {
-      reportImpls.put(clazz, impl);
+    public Watchman addImpl(final Class<? extends ReportEvent> clazz,
+      final BiConsumer<Watchman, ReportEvent> impl) {
+      this.reportImpls.put(clazz, impl);
       return this;
     }
 
     public Watchman addAllImpls(
-      Map<Class<? extends ReportEvent>, BiConsumer<Watchman, ReportEvent>> impls) {
-      reportImpls.putAll(impls);
+      final Map<Class<? extends ReportEvent>, BiConsumer<Watchman, ReportEvent>> impls) {
+      this.reportImpls.putAll(impls);
       return this;
     }
 
@@ -49,7 +49,7 @@ public class ShellWorld extends ActorWorld {
   private final @NonNull Map<Integer, Shell> shells = new HashMap<>();
 
   @Override
-  public void add(Location loc, Actor occupant) {
+  public void add(final Location loc, final Actor occupant) {
     if (occupant instanceof Shell) {
       final Shell shell = (Shell) occupant;
       this.shells.put(shell.getId(), shell);
@@ -77,7 +77,7 @@ public class ShellWorld extends ActorWorld {
     }
   }
 
-  public ShellWorld(Grid<Actor> grid) {
+  public ShellWorld(final Grid<Actor> grid) {
     super(grid);
   }
 

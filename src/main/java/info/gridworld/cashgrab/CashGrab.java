@@ -24,21 +24,21 @@ public class CashGrab {
   public class Bank {
     private final Map<Integer, Integer> balances = new HashMap<>();
 
-    public int getBalance(int id) {
-      return balances.getOrDefault(id, 0);
+    public int getBalance(final int id) {
+      return this.balances.getOrDefault(id, 0);
     }
 
-    public Bank setBalance(int id, int balance) {
-      balances.put(id, balance);
+    public Bank setBalance(final int id, final int balance) {
+      this.balances.put(id, balance);
       return this;
     }
 
-    public Bank bank(Shell shell) {
+    public Bank bank(final Shell shell) {
       shell.tag(CashGrab.Tags.BANK, this);
       return this;
     }
 
-    public Bank transfer(Bank destBank, int src, int dest, int amount) {
+    public Bank transfer(final Bank destBank, final int src, final int dest, final int amount) {
       final int srcBalance = this.getBalance(src);
       final int destBalance = destBank.getBalance(dest);
       this.setBalance(src, srcBalance - amount);
@@ -47,22 +47,22 @@ public class CashGrab {
       return this;
     }
 
-    public Bank transfer(int src, int dest, int amount) {
+    public Bank transfer(final int src, final int dest, final int amount) {
       return this.transfer(this, src, dest, amount);
     }
   }
 
-  public Coin genCoin(AtomicReference<Integer> id, Bank bank) {
+  public Coin genCoin(final AtomicReference<Integer> id, final Bank bank) {
     return new Coin(id.getAndUpdate(x -> x + 1), bank);
   }
 
-  public Coin genCoin(AtomicReference<Integer> id, Bank bank, int initBalance) {
+  public Coin genCoin(final AtomicReference<Integer> id, final Bank bank, final int initBalance) {
     return new Coin(id.getAndUpdate(x -> x + 1), bank, initBalance);
   }
 
-  public Stream.Builder<Coin> addCoins(Stream.Builder<Coin> coins,
-    AtomicReference<Integer> id, Stream<Bank> banks) {
-    banks.forEach(bank -> coins.add(genCoin(id, bank)));
+  public Stream.Builder<Coin> addCoins(final Stream.Builder<Coin> coins,
+    final AtomicReference<Integer> id, final Stream<Bank> banks) {
+    banks.forEach(bank -> coins.add(CashGrab.genCoin(id, bank)));
     return coins;
   }
 }

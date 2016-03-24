@@ -8,9 +8,11 @@ import java.io.Serializable;
 import java.nio.channels.Channels;
 import java.nio.channels.Pipe;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import info.gridworld.actor.ReportEvents.MessageReportEvent;
 import info.gridworld.actor.ShellWorld.Watchman;
 import info.gridworld.actor.Util.Either;
 import info.gridworld.grid.Grid;
@@ -56,7 +58,7 @@ public class Actions {
         Pipe pipe_ = null;
         try {
           pipe_ = Pipe.open();
-        } catch (IOException e) {
+        } catch (final IOException e) {
           e.printStackTrace();
         }
         final Pipe pipe = pipe_;
@@ -66,17 +68,17 @@ public class Actions {
           try {
             message_ = (Serializable) new ObjectInputStream(
               Channels.newInputStream(pipe.source())).readObject();
-          } catch (ClassNotFoundException e) {
+          } catch (final ClassNotFoundException e) {
             e.printStackTrace();
           }
-        } catch (IOException e) {
+        } catch (final IOException e) {
           e.printStackTrace();
         }
         final Serializable message = message_;
         final Watchman watchman = that.getWatchman();
-        final Function<Integer, ReportEvents.MessageReportEvent> report =
-          id -> new ReportEvents.MessageReportEvent(that, that.getId(), id,
-            message);
+        final Function<Integer, BiFunction<Double, Double, ReportEvents.MessageReportEvent>> report =
+          id -> (distance, direction) -> new ReportEvents.MessageReportEvent(
+            that, that.getId(), id, distance, direction, message);
         if (scope.isRight()) {
           final Either<Integer, Pair<Double, Double>> recipient =
             scope.getRightValue();
@@ -97,29 +99,44 @@ public class Actions {
               return;
             }
             final Shell target = (Shell) target_;
-            watchman.report(report.apply(target.getId()));
+            watchman
+              .report(report.apply(target.getId()).apply(distance, direction));
           } else {
             final int recipientId = recipient.getLeftValue();
             final Shell recipientShell =
-              (Shell) watchman.getWorld().getShells().get(recipientId);
-            final Location loc = that.getLocation();
-            final Pair<Double, Double> locRect = Util.locToRect(loc);
-            final Location recipientLoc = recipientShell.getLocation();
+              watchman.getWorld().getShells().get(recipientId);
+            final Pair<Double, Double> locRect = Util.locToRect(that.getLocation());
             final Pair<Double, Double> recipientLocRect =
-              Util.locToRect(recipientLoc);
+              Util.locToRect(recipientShell.getLocation());
             final Pair<Double, Double> offsetRect =
               Util.Pairs.thread(locRect, recipientLocRect, (x, y) -> x - y);
-            final double distance = Util.Pairs.apply(offsetRect, Math::hypot);
+            final Pair<Double, Double> offsetPolar =
+              Util.rectToPolar(offsetRect);
+            final double distance = offsetPolar.getKey();
             if (distance > maxDist) {
               return;
             }
-            watchman.report(report.apply(recipient.getLeftValue()));
+            watchman.report(report.apply(recipient.getLeftValue())
+              .apply(distance, offsetPolar.getValue()));
           }
         } else {
           final double shoutRange = Math.min(scope.getLeftValue(), maxDist);
           final Stream<Actor> listeners = Util.actorsInRadius(that, shoutRange);
           listeners.filter(act -> act instanceof Shell).map(s -> (Shell) s)
-            .map(Shell::getId).map(report).forEach(watchman::report);
+            .forEach(recipient -> {
+            final BiFunction<Double, Double, MessageReportEvent> report_ =
+              report.apply(recipient.getId());
+            final Pair<Double, Double> locRect =
+              Util.locToRect(that.getLocation());
+            final Pair<Double, Double> recipientLocRect =
+              Util.locToRect(recipient.getLocation());
+            final Pair<Double, Double> offsetRect =
+              Util.Pairs.thread(locRect, recipientLocRect, (x, y) -> x - y);
+            final Pair<Double, Double> offsetPolar =
+              Util.rectToPolar(offsetRect);
+            watchman.report(
+              report_.apply(offsetPolar.getKey(), offsetPolar.getValue()));
+          });
         }
       };
     }

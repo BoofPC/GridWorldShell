@@ -26,7 +26,7 @@ import info.gridworld.grid.Grid;
 import javafx.util.Pair;
 
 public class CashGrabRunner {
-  public static void main(String[] args) {
+  public static void main(final String[] args) {
     final Grid<Actor> grid = new BoundedGrid<>(10, 10);
     final ShellWorld world = new ShellWorld(grid);
     world.getWatchman()

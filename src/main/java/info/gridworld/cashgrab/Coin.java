@@ -20,7 +20,7 @@ public class Coin extends Rock {
   @Override
   public void act() {
     super.act();
-    if (bank.getBalance(id) == 0) {
+    if (this.bank.getBalance(this.id) == 0) {
       this.removeSelfFromGrid();
     }
   }

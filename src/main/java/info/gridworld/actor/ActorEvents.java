@@ -31,12 +31,29 @@ public class ActorEvents {
     private static final long serialVersionUID = 1L;
     /**
      * The message to pass. It <em>will</em> be serialized and deserialized in transit.
+     * 
+     * @return the passed message
      */
     private final Serializable message;
+    /**
+     * The distance away from the reciever's perspective.
+     * 
+     * @return the actor's distance away
+     */
+    private final Double distance;
+    /**
+     * The direction offset from the reciever's perspective.
+     * 
+     * @return the offset of the actor's direction
+     */
+    private final Double direction;
 
-    public MessageEvent(final Object source, final Serializable message) {
+    public MessageEvent(final Object source, final Serializable message,
+      final Double distance, final Double direction) {
       super(source);
       this.message = message;
+      this.distance = distance;
+      this.direction = direction;
     }
   }
   /**

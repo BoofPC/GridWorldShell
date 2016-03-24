@@ -68,13 +68,18 @@ public class ReportEvents {
     private static final long serialVersionUID = 1L;
     private final int senderId;
     private final int recipientId;
+    private final double distance;
+    private final double direction;
     private final Serializable message;
 
     public MessageReportEvent(final Object source, final int senderId,
-      final int recipientId, final Serializable message) {
+      final int recipientId, final double distance, final double direction,
+      final Serializable message) {
       super(source);
       this.senderId = senderId;
       this.recipientId = recipientId;
+      this.distance = distance;
+      this.direction = direction;
       this.message = message;
     }
 
@@ -87,8 +92,10 @@ public class ReportEvents {
         if (recipient.getGrid() == null) {
           return;
         }
-        recipient.respond(
-          new ActorEvents.MessageEvent("I see what you did there", message));
+        final Double distance = r.getDistance();
+        final Double direction = r.getDirection();
+        recipient.respond(new ActorEvents.MessageEvent(
+          "I see what you did there", message, distance, direction));
       };
     }
   }

@@ -31,43 +31,43 @@ public class Util {
     @Getter private final Object value;
     @Getter private final boolean right;
 
-    public static <L, R> Either<L, R> right(R right) {
+    public static <L, R> Either<L, R> right(final R right) {
       return Either.of(right, true);
     }
 
-    public static <L, R> Either<L, R> left(L left) {
+    public static <L, R> Either<L, R> left(final L left) {
       return Either.of(left, false);
     }
 
     public boolean isLeft() {
-      return !right;
+      return !this.right;
     }
 
     @SuppressWarnings("unchecked")
     public R getRightValue() {
-      return right ? (R) value : null;
+      return this.right ? (R) this.value : null;
     }
 
     @SuppressWarnings("unchecked")
     public L getLeftValue() {
-      return right ? null : (L) value;
+      return this.right ? null : (L) this.value;
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T either(Function<L, T> ifLeft, Function<R, T> ifRight) {
-      if (right) {
-        return ifRight.apply((R) value);
+    public <T> T either(final Function<L, T> ifLeft, final Function<R, T> ifRight) {
+      if (this.right) {
+        return ifRight.apply((R) this.value);
       } else {
-        return ifLeft.apply((L) value);
+        return ifLeft.apply((L) this.value);
       }
     }
 
     @SuppressWarnings("unchecked")
-    public <T> void either(Consumer<L> ifLeft, Consumer<R> ifRight) {
-      if (right) {
-        ifRight.accept((R) value);
+    public <T> void either(final Consumer<L> ifLeft, final Consumer<R> ifRight) {
+      if (this.right) {
+        ifRight.accept((R) this.value);
       } else {
-        ifLeft.accept((L) value);
+        ifLeft.accept((L) this.value);
       }
     }
   }
@@ -105,7 +105,7 @@ public class Util {
 
   @UtilityClass
   public class Pairs {
-    public <A> Pair<A, A> dup(A a) {
+    public <A> Pair<A, A> dup(final A a) {
       return new Pair<>(a, a);
     }
 
@@ -119,96 +119,96 @@ public class Util {
      * @param fun the function to apply
      * @return the application of <code>xs</code> to <code>fun</code>
      */
-    public <A, B, C> C apply(Pair<A, B> p, BiFunction<A, B, C> fun) {
+    public <A, B, C> C apply(final Pair<A, B> p, final BiFunction<A, B, C> fun) {
       return fun.apply(p.getKey(), p.getValue());
     }
 
-    public <A, B> Pair<B, B> thread(Pair<A, A> p, Function<A, B> fun) {
-      return thread(p, Pairs.dup(fun));
+    public <A, B> Pair<B, B> thread(final Pair<A, A> p, final Function<A, B> fun) {
+      return Pairs.thread(p, Pairs.dup(fun));
     }
 
-    public <A, B, C, D> Pair<B, D> thread(Pair<A, C> p,
-      Pair<Function<A, B>, Function<C, D>> funs) {
-      return thread(funs, p,
+    public <A, B, C, D> Pair<B, D> thread(final Pair<A, C> p,
+      final Pair<Function<A, B>, Function<C, D>> funs) {
+      return Pairs.thread(funs, p,
         new Pair<BiFunction<Function<A, B>, A, B>, BiFunction<Function<C, D>, C, D>>(
           Function::apply, Function::apply));
     }
 
-    public <A, B, C> Pair<C, C> thread(Pair<A, A> p, Pair<B, B> q,
-      BiFunction<A, B, C> fun) {
-      return thread(p, q, Pairs.dup(fun));
+    public <A, B, C> Pair<C, C> thread(final Pair<A, A> p, final Pair<B, B> q,
+      final BiFunction<A, B, C> fun) {
+      return Pairs.thread(p, q, Pairs.dup(fun));
     }
 
-    public <A, B, C, D, E, F> Pair<C, F> thread(Pair<A, D> p, Pair<B, E> q,
-      Pair<BiFunction<A, B, C>, BiFunction<D, E, F>> funs) {
+    public <A, B, C, D, E, F> Pair<C, F> thread(final Pair<A, D> p, final Pair<B, E> q,
+      final Pair<BiFunction<A, B, C>, BiFunction<D, E, F>> funs) {
       return new Pair<>(funs.getKey().apply(p.getKey(), q.getKey()),
         funs.getValue().apply(p.getValue(), q.getValue()));
     }
 
-    public <A, B, C> C applyNullable(Pair<A, B> p, BiFunction<A, B, C> fun) {
+    public <A, B, C> C applyNullable(final Pair<A, B> p, final BiFunction<A, B, C> fun) {
       return Util.applyNullable(p.getKey(), p.getValue(), fun);
     }
 
-    public <A, B, C> C applyNullableOrDefault(Pair<A, B> p,
-      BiFunction<A, B, C> fun, C defaultValue) {
+    public <A, B, C> C applyNullableOrDefault(final Pair<A, B> p,
+      final BiFunction<A, B, C> fun, final C defaultValue) {
       return Util.applyNullableOrDefault(p.getKey(), p.getValue(), fun,
         defaultValue);
     }
 
-    public <A, B> Pair<A, B> liftNull(A a, B b) {
+    public <A, B> Pair<A, B> liftNull(final A a, final B b) {
       return Util.applyNullable(a, b, Pair<A, B>::new);
     }
 
-    public <A, B> Pair<A, B> liftNull(Pair<A, B> p) {
-      return liftNull(p.getKey(), p.getValue());
+    public <A, B> Pair<A, B> liftNull(final Pair<A, B> p) {
+      return Pairs.liftNull(p.getKey(), p.getValue());
     }
 
-    public <A, B> Pair<A, B> liftNullOrDefault(Pair<A, B> p,
-      Pair<A, B> defaultValue) {
+    public <A, B> Pair<A, B> liftNullOrDefault(final Pair<A, B> p,
+      final Pair<A, B> defaultValue) {
       return Util.applyNullableOrDefault(p.getKey(), p.getValue(),
         Pair<A, B>::new, defaultValue);
     }
   }
 
-  public <A> A coalesce(A nullable, A ifNull) {
+  public <A> A coalesce(final A nullable, final A ifNull) {
     return nullable == null ? ifNull : nullable;
   }
 
-  public <A, B> B applyNullable(A a, Function<A, B> fun) {
+  public <A, B> B applyNullable(final A a, final Function<A, B> fun) {
     return a == null ? null : fun.apply(a);
   }
 
-  public <A> void applyNullable(A a, Consumer<A> fun) {
+  public <A> void applyNullable(final A a, final Consumer<A> fun) {
     if (a != null) {
       fun.accept(a);
     }
   }
 
-  public <A, B> B applyNullableOrDefault(A a, Function<A, B> fun,
-    B defaultValue) {
+  public <A, B> B applyNullableOrDefault(final A a, final Function<A, B> fun,
+    final B defaultValue) {
     return a == null ? defaultValue : fun.apply(a);
   }
 
-  public <A, B, C> C applyNullable(A a, B b, BiFunction<A, B, C> fun) {
+  public <A, B, C> C applyNullable(final A a, final B b, final BiFunction<A, B, C> fun) {
     return (a == null || b == null) ? null : fun.apply(a, b);
   }
 
-  public <A, B> void applyNullable(A a, B b, BiConsumer<A, B> fun) {
+  public <A, B> void applyNullable(final A a, final B b, final BiConsumer<A, B> fun) {
     if (a != null && b != null) {
       fun.accept(a, b);
     }
   }
 
-  public <A, B, C> C applyNullableOrDefault(A a, B b, BiFunction<A, B, C> fun,
-    C defaultValue) {
+  public <A, B, C> C applyNullableOrDefault(final A a, final B b, final BiFunction<A, B, C> fun,
+    final C defaultValue) {
     return (a == null || b == null) ? defaultValue : fun.apply(a, b);
   }
 
-  public Pair<Double, Double> rectToPolar(double x, double y) {
+  public Pair<Double, Double> rectToPolar(final double x, final double y) {
     return new Pair<>(Math.hypot(x, y), Math.atan2(y, x));
   }
 
-  public Pair<Double, Double> rectToPolar(Pair<Double, Double> p) {
+  public Pair<Double, Double> rectToPolar(final Pair<Double, Double> p) {
     return Pairs.apply(p, Util::rectToPolar);
   }
 
@@ -219,32 +219,32 @@ public class Util {
    * @param theta Angle in radians
    * @return Pair of x, y in rectangular form
    */
-  public Pair<Double, Double> polarToRect(double r, double theta) {
+  public Pair<Double, Double> polarToRect(final double r, final double theta) {
     return new Pair<>(r * Math.cos(theta), r * Math.sin(theta));
   }
 
-  public Pair<Double, Double> polarToRect(Pair<Double, Double> p) {
+  public Pair<Double, Double> polarToRect(final Pair<Double, Double> p) {
     return Pairs.apply(p, Util::polarToRect);
   }
 
-  public double polarUp(double polarRight) {
+  public double polarUp(final double polarRight) {
     return -(polarRight - Math.PI / 2);
   }
 
-  public double polarRight(double polarUp) {
+  public double polarRight(final double polarUp) {
     return -polarUp + Math.PI / 2;
   }
 
-  public double normalizeRadians(double theta) {
+  public double normalizeRadians(final double theta) {
     return theta
       - (2 * Math.PI) * Math.floor((theta + Math.PI) / (2 * Math.PI));
   }
 
-  public double normalizeDegrees(double theta) {
+  public double normalizeDegrees(final double theta) {
     return theta - 360.0 * Math.floor((theta + 180.0) / 360.0);
   }
 
-  public Location sanitize(Location loc, int numRows, int numCols) {
+  public Location sanitize(final Location loc, final int numRows, final int numCols) {
     int row = loc.getRow();
     int col = loc.getCol();
     if (numRows != -1) {
@@ -256,62 +256,62 @@ public class Util {
     return new Location(row, col);
   }
 
-  public Location sanitize(Location loc, Grid<?> grid) {
-    return sanitize(loc, grid.getNumRows(), grid.getNumCols());
+  public Location sanitize(final Location loc, final Grid<?> grid) {
+    return Util.sanitize(loc, grid.getNumRows(), grid.getNumCols());
   }
 
-  public Pair<Integer, Integer> locToRectInt(Location loc) {
+  public Pair<Integer, Integer> locToRectInt(final Location loc) {
     return new Pair<>(loc.getCol(), -loc.getRow());
   }
 
-  public Pair<Double, Double> locToRect(Location loc) {
+  public Pair<Double, Double> locToRect(final Location loc) {
     return new Pair<>((double) loc.getCol(), (double) -loc.getRow());
   }
 
-  public Location rectToLoc(Pair<Double, Double> rect) {
+  public Location rectToLoc(final Pair<Double, Double> rect) {
     return new Location((int) Math.round(-rect.getValue()),
       (int) Math.round(rect.getKey()));
   }
 
-  public Pair<Double, Double> rectOffset(Pair<Double, Double> from,
-    Pair<Double, Double> to) {
+  public Pair<Double, Double> rectOffset(final Pair<Double, Double> from,
+    final Pair<Double, Double> to) {
     return Util.Pairs.thread(to, from, (x, y) -> x - y);
   }
 
-  public Shell genShell(ShellWorld world, AtomicReference<Integer> id,
-    ActorListener brain) {
+  public Shell genShell(final ShellWorld world, final AtomicReference<Integer> id,
+    final ActorListener brain) {
     return new Shell(id.getAndUpdate(x -> x + 1), brain, world.getWatchman());
   }
 
-  public Stream<Shell> genShells(ShellWorld world, AtomicReference<Integer> id,
-    Stream<? extends ActorListener> brains) {
-    return brains.map(brain -> genShell(world, id, brain));
+  public Stream<Shell> genShells(final ShellWorld world, final AtomicReference<Integer> id,
+    final Stream<? extends ActorListener> brains) {
+    return brains.map(brain -> Util.genShell(world, id, brain));
   }
 
-  public Stream<Shell> genShells(ShellWorld world, AtomicReference<Integer> id,
-    Stream<? extends ActorListener> brains,
-    Map<Class<? extends Action>, BiConsumer<Shell, Action>> baseImpls) {
+  public Stream<Shell> genShells(final ShellWorld world, final AtomicReference<Integer> id,
+    final Stream<? extends ActorListener> brains,
+    final Map<Class<? extends Action>, BiConsumer<Shell, Action>> baseImpls) {
     return brains
-      .map(brain -> genShell(world, id, brain).addAllImpls(baseImpls));
+      .map(brain -> Util.genShell(world, id, brain).addAllImpls(baseImpls));
   }
 
-  public Stream.Builder<Actor> addShells(Stream.Builder<Actor> actors,
-    ShellWorld world, AtomicReference<Integer> id,
-    Stream<? extends ActorListener> brains) {
-    genShells(world, id, brains).forEach(actors::add);
+  public Stream.Builder<Actor> addShells(final Stream.Builder<Actor> actors,
+    final ShellWorld world, final AtomicReference<Integer> id,
+    final Stream<? extends ActorListener> brains) {
+    Util.genShells(world, id, brains).forEach(actors::add);
     return actors;
   }
 
-  public Stream.Builder<Actor> addShells(Stream.Builder<Actor> actors,
-    ShellWorld world, AtomicReference<Integer> id,
-    Stream<? extends ActorListener> brains,
-    Map<Class<? extends Action>, BiConsumer<Shell, Action>> baseImpls) {
+  public Stream.Builder<Actor> addShells(final Stream.Builder<Actor> actors,
+    final ShellWorld world, final AtomicReference<Integer> id,
+    final Stream<? extends ActorListener> brains,
+    final Map<Class<? extends Action>, BiConsumer<Shell, Action>> baseImpls) {
     brains.forEach(
-      brain -> actors.add(genShell(world, id, brain).addAllImpls(baseImpls)));
+      brain -> actors.add(Util.genShell(world, id, brain).addAllImpls(baseImpls)));
     return actors;
   }
 
-  public <T> void scatter(World<T> world, Stream<? extends T> things) {
+  public <T> void scatter(final World<T> world, final Stream<? extends T> things) {
     things.forEach(t -> Optional.ofNullable(world.getRandomEmptyLocation())
       .ifPresent(loc -> world.add(loc, t)));
   }

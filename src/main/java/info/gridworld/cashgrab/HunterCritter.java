@@ -60,9 +60,9 @@ public class HunterCritter implements ActorListener {
       final Serializable message_ = ((MessageEvent) e).getMessage();
       matingCall: if (message_ instanceof MatingCall) {
         final MatingCall message = (MatingCall) message_;
-        if (time >= BABY_TIME) {
-          if (mate != null) {
-            if (!mate.getUuid().equals(message.getInfo().getUuid())) {
+        if (this.time >= HunterCritter.BABY_TIME) {
+          if (this.mate != null) {
+            if (!this.mate.getUuid().equals(message.getInfo().getUuid())) {
               break matingCall;
             }
           }
@@ -70,22 +70,22 @@ public class HunterCritter implements ActorListener {
       }
     } else if (e instanceof StepEvent) {
       finalAction: {
-        if (firstRun) {
+        if (this.firstRun) {
           actions.add(new ColorAction(Color.ORANGE));
         }
-        time++;
-        lastBaby++;
-        if (lastBaby > BABY_TIME) {
-          if (mate != null) {
+        this.time++;
+        this.lastBaby++;
+        if (this.lastBaby > HunterCritter.BABY_TIME) {
+          if (this.mate != null) {
             break finalAction;
           }
-          final Pair<Action, ActorInfo> courtAction = court(environment);
+          final Pair<Action, ActorInfo> courtAction = this.court(environment);
           if (courtAction != null) {
             //mate = Optional.of(courtAction.get());
             actions.add(courtAction.getKey());
           }
         }
-        final Action eatAction = eatPrey(environment);
+        final Action eatAction = this.eatPrey(environment);
         if (eatAction != null) {
           actions.add(eatAction);
           break finalAction;
@@ -102,7 +102,7 @@ public class HunterCritter implements ActorListener {
     return actions.build();
   }
 
-  private Pair<Action, ActorInfo> court(Set<ActorInfo> environment) {
+  private Pair<Action, ActorInfo> court(final Set<ActorInfo> environment) {
     final String name = this.getClass().getName();
     final ActorInfo lover = environment.stream()
       .filter(a -> Util.coalesce(a.getType(), "").equals(name)).findAny()
@@ -117,7 +117,7 @@ public class HunterCritter implements ActorListener {
     return Pairs.liftNull(Util.applyNullable(loverLocation, messageFun), lover);
   }
 
-  private Action eatPrey(Set<ActorInfo> environment) {
+  private Action eatPrey(final Set<ActorInfo> environment) {
     final String name = this.getClass().getName();
     final ActorInfo prey = environment.stream()
       .filter(a -> !Util.coalesce(a.getType(), "").equals(name))

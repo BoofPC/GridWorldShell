@@ -44,50 +44,50 @@ public class Shell extends Actor {
     this.actionImpls.put(ColorAction.class, ColorAction.impl());
   }
 
-  public Shell addImpl(Class<? extends Action> clazz,
-    BiConsumer<Shell, Action> impl) {
-    actionImpls.put(clazz, impl);
+  public Shell addImpl(final Class<? extends Action> clazz,
+    final BiConsumer<Shell, Action> impl) {
+    this.actionImpls.put(clazz, impl);
     return this;
   }
 
   public Shell addAllImpls(
-    Map<Class<? extends Action>, BiConsumer<Shell, Action>> impls) {
-    actionImpls.putAll(impls);
+    final Map<Class<? extends Action>, BiConsumer<Shell, Action>> impls) {
+    this.actionImpls.putAll(impls);
     return this;
   }
 
-  public Shell tag(String tag) {
+  public Shell tag(final String tag) {
     this.tag(tag, null);
     return this;
   }
 
-  public Shell tag(String tag, Object value) {
+  public Shell tag(final String tag, final Object value) {
     this.tags.put(tag, value);
     return this;
   }
 
-  public Shell tag(Tag tag) {
+  public Shell tag(final Tag tag) {
     return this.tag(tag.getTag());
   }
 
-  public Shell tag(Tag tag, Object value) {
+  public Shell tag(final Tag tag, final Object value) {
     return this.tag(tag.getTag(), value);
   }
 
-  public Object getTag(String tag) {
+  public Object getTag(final String tag) {
     return this.tags.get(tag);
   }
 
-  public Object getTagOrDefault(String tag, Object defaultValue) {
+  public Object getTagOrDefault(final String tag, final Object defaultValue) {
     final Object value = this.getTag(tag);
     return value == null ? defaultValue : value;
   }
 
-  public Object getTag(Tag tag) {
+  public Object getTag(final Tag tag) {
     return this.tags.get(tag.getTag());
   }
 
-  public Object getTagOrDefault(Tag tag, Object defaultValue) {
+  public Object getTagOrDefault(final Tag tag, final Object defaultValue) {
     final Object value = this.getTag(tag);
     return value == null ? defaultValue : value;
   }
@@ -115,7 +115,7 @@ public class Shell extends Actor {
       final Pair<Double, Double> offset =
         Util.rectOffset(myLocRect, actorLocRect);
       final Pair<Double, Double> offsetPolar = Util.rectToPolar(offset);
-      double offsetDirection =
+      final double offsetDirection =
         Math.toDegrees(Util.polarUp(offsetPolar.getValue()));
       actorInfo.distance(offsetPolar.getKey())
         .direction(Util.normalizeDegrees(offsetDirection - myDirection));
