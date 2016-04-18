@@ -27,7 +27,7 @@ import javafx.util.Pair;
 
 public class CashGrabRunner {
   public static void main(final String[] args) {
-    final Grid<Actor> grid = new BoundedGrid<>(10, 10);
+    final Grid<Actor> grid = new BoundedGrid<>(50, 50);
     final ShellWorld world = new ShellWorld(grid);
     world.getWatchman()
       .addImpl(CollisionReportEvent.class, CollisionReportEvent.impl())
@@ -45,12 +45,12 @@ public class CashGrabRunner {
     final AtomicReference<Integer> bankId = new AtomicReference<>(0);
     final CashGrab.Bank bank = new CashGrab.Bank();
     Util.scatter(world,
-      Stream.generate(() -> CashGrab.genCoin(bankId, bank, 5)).limit(1));
+      Stream.generate(() -> CashGrab.genCoin(bankId, bank, 5)).limit(84));
     final Stream.Builder<ActorListener> brains = Stream.builder();
     Util.addShells(players, world, id, brains.build(), baseImpls);
     Util.scatter(world,
       Util
-        .genShells(world, id, Stream.generate(CalebBug::new).limit(1),
+        .genShells(world, id, Stream.generate(CalebBug::new).limit(15),
           baseImpls)
         .map(s -> s.tag(CashGrab.Tags.BANK,
           new Pair<>(bank, bankId.getAndUpdate(n -> n + 1)))));
@@ -65,7 +65,7 @@ public class CashGrabRunner {
         .addAllImpls(baseImpls).tag(CashGrab.Tags.IS_FEMALE.getTag(), female)
         .tag(CashGrab.Tags.PREDATOR.getTag(), true)
         .tag(Shell.Tags.PUSHABLE.getTag(), true);
-    }).limit(0));
+    }).limit(15));
     world.show();
   }
 }
