@@ -66,4 +66,7 @@ distributions {
     }
 }
 
+distTar.compression = Compression.GZIP
+distTar.extension = "tar.gz"
+
 [distZip, distTar]*.dependsOn(jar, delombok, javadocJar)
