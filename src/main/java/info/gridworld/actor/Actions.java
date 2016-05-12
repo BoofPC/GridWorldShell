@@ -52,7 +52,7 @@ public class Actions {
     public static BiConsumer<Shell, Action> impl(final double maxDist) {
       return (final Shell that, final Action a) -> {
         final Either<Double, Either<Integer, Pair<Double, Double>>> scope =
-          ((MessageAction) a).getRecipient();
+            ((MessageAction) a).getRecipient();
         final Serializable messageIn = ((MessageAction) a).getMessage();
         Serializable message_ = null;
         Pipe pipe_ = null;
@@ -63,11 +63,10 @@ public class Actions {
         }
         final Pipe pipe = pipe_;
         try {
-          new ObjectOutputStream(Channels.newOutputStream(pipe_.sink()))
-            .writeObject(messageIn);
+          new ObjectOutputStream(Channels.newOutputStream(pipe_.sink())).writeObject(messageIn);
           try {
-            message_ = (Serializable) new ObjectInputStream(
-              Channels.newInputStream(pipe.source())).readObject();
+            message_ = (Serializable) new ObjectInputStream(Channels.newInputStream(pipe.source()))
+                .readObject();
           } catch (final ClassNotFoundException e) {
             e.printStackTrace();
           }
@@ -77,11 +76,10 @@ public class Actions {
         final Serializable message = message_;
         final Watchman watchman = that.getWatchman();
         final Function<Integer, BiFunction<Double, Double, ReportEvents.MessageReportEvent>> report =
-          id -> (distance, direction) -> new ReportEvents.MessageReportEvent(
-            that, that.getId(), id, distance, direction, message);
+            id -> (distance, direction) -> new ReportEvents.MessageReportEvent(that, that.getId(),
+                id, distance, direction, message);
         if (scope.isRight()) {
-          final Either<Integer, Pair<Double, Double>> recipient =
-            scope.getRightValue();
+          final Either<Integer, Pair<Double, Double>> recipient = scope.getRightValue();
           final Grid<Actor> grid = that.getGrid();
           if (recipient.isRight()) {
             // check and report MessageReportEvent at offset
@@ -90,59 +88,50 @@ public class Actions {
             final double direction = offsetPolar.getValue();
             final Location loc = that.getLocation();
             final Pair<Double, Double> offsets = Util.polarToRect(distance,
-              Util.polarRight(Math.toRadians(that.getDirection() + direction)));
-            final Location targetLoc =
-              new Location((int) (loc.getRow() + offsets.getKey()),
-                (int) (loc.getCol() + offsets.getValue()));
+                Util.polarRight(Math.toRadians(that.getDirection() + direction)));
+            final Location targetLoc = Util.sanitize(new Location((int) (loc.getRow() + offsets.getKey()),
+                (int) (loc.getCol() + offsets.getValue())), grid);
             final Actor target_ = grid.get(targetLoc);
             if ((target_ == null) || !(target_ instanceof Shell)) {
               return;
             }
             final Shell target = (Shell) target_;
-            watchman
-              .report(report.apply(target.getId()).apply(distance, direction));
+            watchman.report(report.apply(target.getId()).apply(distance, direction));
           } else {
             final int recipientId = recipient.getLeftValue();
-            final Shell recipientShell =
-              watchman.getWorld().getShells().get(recipientId);
+            final Shell recipientShell = watchman.getWorld().getShells().get(recipientId);
             final Pair<Double, Double> locRect = Util.locToRect(that.getLocation());
             final Pair<Double, Double> recipientLocRect =
-              Util.locToRect(recipientShell.getLocation());
+                Util.locToRect(recipientShell.getLocation());
             final Pair<Double, Double> offsetRect =
-              Util.Pairs.thread(locRect, recipientLocRect, (x, y) -> x - y);
-            final Pair<Double, Double> offsetPolar =
-              Util.rectToPolar(offsetRect);
+                Util.Pairs.thread(locRect, recipientLocRect, (x, y) -> x - y);
+            final Pair<Double, Double> offsetPolar = Util.rectToPolar(offsetRect);
             final double distance = offsetPolar.getKey();
             if (distance > maxDist) {
               return;
             }
-            watchman.report(report.apply(recipient.getLeftValue())
-              .apply(distance, offsetPolar.getValue()));
+            watchman.report(
+                report.apply(recipient.getLeftValue()).apply(distance, offsetPolar.getValue()));
           }
         } else {
           final double shoutRange = Math.min(scope.getLeftValue(), maxDist);
           final Stream<Actor> listeners = Util.actorsInRadius(that, shoutRange);
-          listeners.filter(act -> act instanceof Shell).map(s -> (Shell) s)
-            .forEach(recipient -> {
+          listeners.filter(act -> act instanceof Shell).map(s -> (Shell) s).forEach(recipient -> {
             final BiFunction<Double, Double, MessageReportEvent> report_ =
-              report.apply(recipient.getId());
-            final Pair<Double, Double> locRect =
-              Util.locToRect(that.getLocation());
-            final Pair<Double, Double> recipientLocRect =
-              Util.locToRect(recipient.getLocation());
+                report.apply(recipient.getId());
+            final Pair<Double, Double> locRect = Util.locToRect(that.getLocation());
+            final Pair<Double, Double> recipientLocRect = Util.locToRect(recipient.getLocation());
             final Pair<Double, Double> offsetRect =
-              Util.Pairs.thread(locRect, recipientLocRect, (x, y) -> x - y);
-            final Pair<Double, Double> offsetPolar =
-              Util.rectToPolar(offsetRect);
-            watchman.report(
-              report_.apply(offsetPolar.getKey(), offsetPolar.getValue()));
+                Util.Pairs.thread(locRect, recipientLocRect, (x, y) -> x - y);
+            final Pair<Double, Double> offsetPolar = Util.rectToPolar(offsetRect);
+            watchman.report(report_.apply(offsetPolar.getKey(), offsetPolar.getValue()));
           });
         }
       };
     }
   }
   /**
-   * The {@code MessageAction} class represents the act of moving forward.
+   * The {@code MoveAction} class represents the act of moving forward.
    */
   @Data
   public class MoveAction implements Action {
@@ -168,8 +157,8 @@ public class Actions {
         dest = Util.sanitize(dest, grid);
         final Actor destActor = grid.get(dest);
         if (destActor != null) {
-          that.getWatchman().report(new ReportEvents.CollisionReportEvent(that,
-            that, destActor, direction));
+          that.getWatchman()
+              .report(new ReportEvents.CollisionReportEvent(that, that, destActor, direction));
           return;
         }
         that.moveTo(dest);

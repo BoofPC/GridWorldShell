@@ -20,9 +20,8 @@ public class CashGrab {
   @Getter
   @RequiredArgsConstructor
   public enum Tags implements info.gridworld.actor.Tag {
-    BANK("CashGrab.Bank"), MINABLE("CashGrab.Minable"),
-      IS_FEMALE("CashGrab.IsFemale"), PREDATOR("CashGrab.Predator"),
-      SHOW_SCORE("CashGrab.ShowScore");
+    BANK("CashGrab.Bank"), MINABLE("CashGrab.Minable"), IS_FEMALE("CashGrab.IsFemale"), PREDATOR(
+        "CashGrab.Predator"), SHOW_SCORE("CashGrab.ShowScore");
     private final String tag;
   }
   @Data
@@ -66,16 +65,18 @@ public class CashGrab {
   }
 
   public Stream.Builder<Coin> addCoins(final Stream.Builder<Coin> coins,
-    final AtomicReference<Integer> id, final Stream<Bank> banks) {
+      final AtomicReference<Integer> id, final Stream<Bank> banks) {
     banks.forEach(bank -> coins.add(CashGrab.genCoin(id, bank)));
     return coins;
   }
-  
-  public static void coinMessage(final ShellWorld that, final Pair<List<Actor>, AtomicReference<Object>> data) {
+
+  public static void coinMessage(final ShellWorld that,
+      final Pair<List<Actor>, AtomicReference<Object>> data) {
     final List<Actor> actors = data.getKey();
     Bank masterBank = null;
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-	final AtomicReference<HashMap<Integer, Pair<String, Integer>>> balances_ = (AtomicReference) data.getValue();
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    final AtomicReference<HashMap<Integer, Pair<String, Integer>>> balances_ =
+        (AtomicReference) data.getValue();
     balances_.compareAndSet(null, new HashMap<>());
     final HashMap<Integer, Pair<String, Integer>> balances = balances_.get();
     for (final Actor actor_ : actors) {
@@ -93,35 +94,35 @@ public class CashGrab {
       }
       final Bank bank = bank_.getKey();
       if (masterBank == null) {
-    	  masterBank = bank;
+        masterBank = bank;
       }
       final Integer id_ = bank_.getValue();
       if (id_ == null) {
         continue;
       }
       balances.compute(id_, (id, identOld) -> {
-    	  String name = null;
-    	  if (identOld == null) {
-            name = actor.getBrain().getClass().getSimpleName();
-    	  } else {
-    		  name = identOld.getKey();
-    	  }
-    	  final int balance = bank.getBalance(id);
-    	  return new Pair<>(name, balance);
+        String name = null;
+        if (identOld == null) {
+          name = actor.getBrain().getClass().getSimpleName();
+        } else {
+          name = identOld.getKey();
+        }
+        final int balance = bank.getBalance(id);
+        return new Pair<>(name, balance);
       });
     }
     final StringBuilder msg = new StringBuilder(that.getMessage());
     msg.append("Current standings:");
     balances.forEach((id, info) -> {
-    	final String name = info.getKey();
-    	final Integer balance = info.getValue();
-    	msg.append(" (");
-    	msg.append(name);
-    	msg.append('[');
-    	msg.append(id.toString());
-    	msg.append("] ");
-    	msg.append(balance.toString());
-    	msg.append(')');
+      final String name = info.getKey();
+      final Integer balance = info.getValue();
+      msg.append(" (");
+      msg.append(name);
+      msg.append('[');
+      msg.append(id.toString());
+      msg.append("] ");
+      msg.append(balance.toString());
+      msg.append(')');
     });
     msg.append('\n');
     that.setMessage(msg.toString());

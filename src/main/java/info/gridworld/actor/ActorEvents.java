@@ -48,8 +48,8 @@ public class ActorEvents {
      */
     private final Double direction;
 
-    public MessageEvent(final Object source, final Serializable message,
-      final Double distance, final Double direction) {
+    public MessageEvent(final Object source, final Serializable message, final Double distance,
+        final Double direction) {
       super(source);
       this.message = message;
       this.distance = distance;
@@ -68,8 +68,7 @@ public class ActorEvents {
      */
     private final @NonNull ActorInfo collidedWith;
 
-    public CollisionEvent(final Object source,
-      final @NonNull ActorInfo collidedWith) {
+    public CollisionEvent(final Object source, final @NonNull ActorInfo collidedWith) {
       super(source);
       this.collidedWith = collidedWith;
     }

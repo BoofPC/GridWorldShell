@@ -20,6 +20,5 @@ public interface ActorListener extends EventListener {
    * @param environment information about the detectable actors
    * @return the response to the event
    */
-  Stream<Action> eventResponse(ActorEvent e, ActorInfo self,
-    Set<ActorInfo> environment);
+  Stream<Action> eventResponse(ActorEvent e, ActorInfo self, Set<ActorInfo> environment);
 }

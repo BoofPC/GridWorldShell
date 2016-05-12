@@ -26,16 +26,19 @@ public class Shell extends Actor {
     private final String tag;
   }
 
-  @Getter private final int id;
-  @Getter private final @NonNull ActorListener brain;
-  @Getter private final @NonNull Watchman watchman;
+  @Getter
+  private final int id;
+  @Getter
+  private final @NonNull ActorListener brain;
+  @Getter
+  private final @NonNull Watchman watchman;
   private Stream<Action> nextActions;
   private final @NonNull Map<Class<? extends Action>, BiConsumer<Shell, Action>> actionImpls =
-    new HashMap<>();
-  @Getter private final @NonNull Map<String, Object> tags = new HashMap<>();
+      new HashMap<>();
+  @Getter
+  private final @NonNull Map<String, Object> tags = new HashMap<>();
 
-  public Shell(final int id, final @NonNull ActorListener brain,
-    final @NonNull Watchman watchman) {
+  public Shell(final int id, final @NonNull ActorListener brain, final @NonNull Watchman watchman) {
     this.id = id;
     this.brain = brain;
     this.watchman = watchman;
@@ -44,14 +47,12 @@ public class Shell extends Actor {
     this.actionImpls.put(ColorAction.class, ColorAction.impl());
   }
 
-  public Shell addImpl(final Class<? extends Action> clazz,
-    final BiConsumer<Shell, Action> impl) {
+  public Shell addImpl(final Class<? extends Action> clazz, final BiConsumer<Shell, Action> impl) {
     this.actionImpls.put(clazz, impl);
     return this;
   }
 
-  public Shell addAllImpls(
-    final Map<Class<? extends Action>, BiConsumer<Shell, Action>> impls) {
+  public Shell addAllImpls(final Map<Class<? extends Action>, BiConsumer<Shell, Action>> impls) {
     this.actionImpls.putAll(impls);
     return this;
   }
@@ -93,8 +94,8 @@ public class Shell extends Actor {
   }
 
   public void respond(final ActorEvent event) {
-    final ActorInfo that = ActorInfo.builder().id(this.id).distance(0.0)
-      .direction(0.0).color(this.getColor()).build();
+    final ActorInfo that =
+        ActorInfo.builder().id(this.id).distance(0.0).direction(0.0).color(this.getColor()).build();
     final Set<ActorInfo> environment = new HashSet<>();
     final double myDirection = this.getDirection();
     final Location myLoc = this.getLocation();
@@ -108,17 +109,17 @@ public class Shell extends Actor {
         actorType_ = actor.getClass();
       }
       final Class<?> actorType = actorType_;
-      final ActorInfo.ActorInfoBuilder actorInfo =
-        ActorInfo.builder().type(actorType.getName());
+      final ActorInfo.ActorInfoBuilder actorInfo = ActorInfo.builder().type(actorType.getName());
+      if (actor instanceof Shell) {
+        actorInfo.id(((Shell) actor).getId());
+      }
       final Location actorLoc = actor.getLocation();
       final Pair<Double, Double> actorLocRect = Util.locToRect(actorLoc);
-      final Pair<Double, Double> offset =
-        Util.rectOffset(myLocRect, actorLocRect);
+      final Pair<Double, Double> offset = Util.rectOffset(myLocRect, actorLocRect);
       final Pair<Double, Double> offsetPolar = Util.rectToPolar(offset);
-      final double offsetDirection =
-        Math.toDegrees(Util.polarUp(offsetPolar.getValue()));
+      final double offsetDirection = Math.toDegrees(Util.polarUp(offsetPolar.getValue()));
       actorInfo.distance(offsetPolar.getKey())
-        .direction(Util.normalizeDegrees(offsetDirection - myDirection));
+          .direction(Util.normalizeDegrees(offsetDirection - myDirection));
       actorInfo.color(actor.getColor());
       environment.add(actorInfo.build());
     });

@@ -35,13 +35,11 @@ public class Actions {
       return true;
     }
 
-    public static BiConsumer<Shell, Action> impl(final int maxDist,
-      final int maxMine) {
+    public static BiConsumer<Shell, Action> impl(final int maxDist, final int maxMine) {
       return (final Shell that, final Action a) -> {
-        @SuppressWarnings("unchecked") final Pair<Bank, Integer> bank_ =
-          (Pair<Bank, Integer>) that.getTag(CashGrab.Tags.BANK);
-        if (bank_ == null || bank_.getKey() == null
-          || bank_.getValue() == null) {
+        @SuppressWarnings("unchecked")
+        final Pair<Bank, Integer> bank_ = (Pair<Bank, Integer>) that.getTag(CashGrab.Tags.BANK);
+        if (bank_ == null || bank_.getKey() == null || bank_.getValue() == null) {
           System.out.println("null bank of " + that.getId());
           return;
         }
@@ -49,18 +47,17 @@ public class Actions {
         final double distance = Math.min(cca.getDistance(), maxDist);
         final double direction = cca.getDirection();
         System.out.println(that.getId() + " at " + that.getLocation()
-          + " attempting collection of distance " + distance + " direction "
-          + that.getDirection() + " target direction " + direction);
+            + " attempting collection of distance " + distance + " direction " + that.getDirection()
+            + " target direction " + direction);
         final Pair<Double, Double> loc = Util.locToRect(that.getLocation());
         final Grid<Actor> grid = that.getGrid();
         final Pair<Double, Double> offset = Util.polarToRect(distance,
-          Util.polarRight(Math.toRadians(that.getDirection() + direction)));
-        final Location targetLoc =
-          Util.rectToLoc(Pairs.thread(loc, offset, (x, y) -> x + y));
+            Util.polarRight(Math.toRadians(that.getDirection() + direction)));
+        final Location targetLoc = Util.rectToLoc(Pairs.thread(loc, offset, (x, y) -> x + y));
         System.out.println("targeting " + targetLoc + " offset " + offset);
         final Actor target_ = grid.get(Util.sanitize(targetLoc, grid));
         if (target_ == null) {
-          System.out.println("null target");
+          System.out.println("null target coin");
           return;
         }
         Pair<Bank, Integer> targetBank_ = null;
@@ -70,10 +67,9 @@ public class Actions {
             System.out.println("non-minable target");
             return;
           }
-          @SuppressWarnings({
-              "unchecked"}) final Pair<Bank, Integer> targetBank__ =
-                ((Pair<Bank, Integer>) target
-                  .getTagOrDefault(CashGrab.Tags.BANK, null));
+          @SuppressWarnings({"unchecked"})
+          final Pair<Bank, Integer> targetBank__ =
+              ((Pair<Bank, Integer>) target.getTagOrDefault(CashGrab.Tags.BANK, null));
           targetBank_ = targetBank__;
         } else if (target_ instanceof Coin) {
           final Coin target = (Coin) target_;
@@ -93,8 +89,7 @@ public class Actions {
         System.out.println("transfer attempt " + id + " to " + targetId);
         if (targetBank.getBalance(targetId) > 0) {
           bank.transfer(targetBank, targetId, id, maxMine);
-          System.out
-            .println("transfer " + id + " to " + targetId + " complete");
+          System.out.println("transfer " + id + " to " + targetId + " complete");
         }
       };
     }
@@ -121,28 +116,34 @@ public class Actions {
     public static BiConsumer<Shell, Action> impl(final int maxDist) {
       return (final Shell that, final Action a) -> {
         if (!((boolean) that.getTagOrDefault(CashGrab.Tags.PREDATOR, false))) {
-          System.out.println("not a pred");
+          System.out.println(that.getId() + " not a pred");
           return;
         }
         final Location loc = that.getLocation();
         final ConsumeAction ca = ((ConsumeAction) a);
         final Grid<Actor> grid = that.getGrid();
-        final Pair<Double, Double> offsets =
-          Util.polarToRect(ca.getDistance(), Util.polarRight(
-            Math.toRadians(that.getDirection() + ca.getDirection())));
-        final Location preyLoc =
-          new Location((int) (loc.getRow() + offsets.getKey()),
-            (int) (loc.getCol() + offsets.getValue()));
-        final Actor prey = grid.get(Util.sanitize(preyLoc, grid));
+        final Pair<Double, Double> offsets = Util.polarToRect(ca.getDistance(),
+            Util.polarRight(Math.toRadians(that.getDirection() + ca.getDirection())));
+        final Location offsetLoc = Util.rectToLoc(offsets);
+        final Location preyLoc = new Location((int) (loc.getRow() + offsetLoc.getRow()),
+            (int) (loc.getCol() + offsetLoc.getCol()));
+        System.out.print(that.getId() + " going for " + preyLoc + ", ");
+        final Location cleanPreyLoc = Util.sanitize(preyLoc, grid);
+        System.out.print("got " + cleanPreyLoc + ", ");
+        final Actor prey = grid.get(cleanPreyLoc);
         if (prey == null) {
           System.out.println("nothing to eat");
           return;
         }
         if (prey == that) {
-          System.out.println("can't eat self");
+          System.out.println("can't eat itself");
           return;
         }
-        System.out.println("om nom nom");
+        if (prey instanceof Coin) {
+          System.out.println("can't eat coin");
+          return;
+        }
+        System.out.println("om nom nom for " + that.getId() + " at " + preyLoc);
         prey.removeSelfFromGrid();
       };
     }

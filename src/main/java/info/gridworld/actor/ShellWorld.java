@@ -16,22 +16,23 @@ import lombok.NonNull;
 @Getter
 public class ShellWorld extends ActorWorld {
   public static class Watchman implements ReportListener {
-    @Getter private final @NonNull ShellWorld world;
+    @Getter
+    private final @NonNull ShellWorld world;
     private final Map<Class<? extends ReportEvent>, BiConsumer<Watchman, ReportEvent>> reportImpls =
-      new HashMap<>();
+        new HashMap<>();
 
     public Watchman(final @NonNull ShellWorld world) {
       this.world = world;
     }
 
     public Watchman addImpl(final Class<? extends ReportEvent> clazz,
-      final BiConsumer<Watchman, ReportEvent> impl) {
+        final BiConsumer<Watchman, ReportEvent> impl) {
       this.reportImpls.put(clazz, impl);
       return this;
     }
 
     public Watchman addAllImpls(
-      final Map<Class<? extends ReportEvent>, BiConsumer<Watchman, ReportEvent>> impls) {
+        final Map<Class<? extends ReportEvent>, BiConsumer<Watchman, ReportEvent>> impls) {
       this.reportImpls.putAll(impls);
       return this;
     }
@@ -39,8 +40,7 @@ public class ShellWorld extends ActorWorld {
     @Override
     public void report(final ReportEvent r) {
       final Class<? extends ReportEvent> clazz = r.getClass();
-      final BiConsumer<Watchman, ReportEvent> impl =
-        this.reportImpls.get(clazz);
+      final BiConsumer<Watchman, ReportEvent> impl = this.reportImpls.get(clazz);
       if (impl != null) {
         impl.accept(this, r);
       }
@@ -68,8 +68,7 @@ public class ShellWorld extends ActorWorld {
       final Actor actor = grid.get(loc);
       actors.add(actor);
       if (actor instanceof Shell) {
-        ((Shell) actor)
-          .respond(new ActorEvents.StepEvent("I see what you did there"));
+        ((Shell) actor).respond(new ActorEvents.StepEvent("I see what you did there"));
       }
     }
     for (final Actor actor : actors) {
@@ -79,9 +78,11 @@ public class ShellWorld extends ActorWorld {
       }
     }
     onSteps.forEach((k, v) -> k.accept(this, new Pair<>(actors, v)));
+    System.out.println("=====");
   }
-  
-  public ShellWorld(final Grid<Actor> grid, final Iterable<BiConsumer<ShellWorld, Pair<List<Actor>, AtomicReference<Object>>>> onSteps) {
+
+  public ShellWorld(final Grid<Actor> grid,
+      final Iterable<BiConsumer<ShellWorld, Pair<List<Actor>, AtomicReference<Object>>>> onSteps) {
     super(grid);
     this.onSteps = new HashMap<>();
     onSteps.forEach(f -> this.onSteps.put(f, new AtomicReference<>()));
@@ -95,8 +96,9 @@ public class ShellWorld extends ActorWorld {
     super();
     this.onSteps = new HashMap<>();
   }
-  
-  public static void clearMessage(final ShellWorld that, final Pair<List<Actor>, AtomicReference<Object>> data) {
+
+  public static void clearMessage(final ShellWorld that,
+      final Pair<List<Actor>, AtomicReference<Object>> data) {
     that.setMessage("");
   }
 }

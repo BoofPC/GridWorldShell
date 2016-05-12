@@ -20,12 +20,14 @@ import info.gridworld.actor.Util.Either;
 import info.gridworld.actor.Util.Pairs;
 import info.gridworld.cashgrab.Actions.ConsumeAction;
 import javafx.util.Pair;
+import lombok.Data;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 
-@RequiredArgsConstructor
+@Data
 public class HunterCritter implements ActorListener {
-  private static final int BABY_TIME = 30;
+  public static final int BABY_TIME = 30;
 
   @Value
   public static class MatingCall implements Serializable {
@@ -54,7 +56,7 @@ public class HunterCritter implements ActorListener {
 
   @Override
   public Stream<Action> eventResponse(final ActorEvent e, final ActorInfo self,
-    final Set<ActorInfo> environment) {
+      final Set<ActorInfo> environment) {
     final Stream.Builder<Action> actions = Stream.builder();
     if (e instanceof MessageEvent) {
       final Serializable message_ = ((MessageEvent) e).getMessage();
@@ -79,13 +81,13 @@ public class HunterCritter implements ActorListener {
           if (this.mate != null) {
             break finalAction;
           }
-          final Pair<Action, ActorInfo> courtAction = this.court(environment);
+          final Pair<Action, ActorInfo> courtAction = this.court(self, environment);
           if (courtAction != null) {
             //mate = Optional.of(courtAction.get());
             actions.add(courtAction.getKey());
           }
         }
-        final Action eatAction = this.eatPrey(environment);
+        final Action eatAction = this.eatPrey(self, environment);
         if (eatAction != null) {
           actions.add(eatAction);
           break finalAction;
@@ -102,34 +104,32 @@ public class HunterCritter implements ActorListener {
     return actions.build();
   }
 
-  private Pair<Action, ActorInfo> court(final Set<ActorInfo> environment) {
+  private Pair<Action, ActorInfo> court(final ActorInfo self, final Set<ActorInfo> environment) {
     final String name = this.getClass().getName();
     final ActorInfo lover = environment.stream()
-      .filter(a -> Util.coalesce(a.getType(), "").equals(name)).findAny()
-      .orElse(null);
+        .filter(a -> Util.coalesce(a.getType(), "").equals(name)).findAny().orElse(null);
     if (lover == null) {
       return null;
     }
     final Pair<Double, Double> loverLocation =
-      Pairs.liftNull(lover.getDistance(), lover.getDirection());
+        Pairs.liftNull(lover.getDistance(), lover.getDirection());
     final Function<Pair<Double, Double>, MessageAction> messageFun =
-      p -> new MessageAction(Either.right(Either.right(p)), "hey baby");
+        p -> new MessageAction(Either.right(Either.right(p)), "hey baby");
     return Pairs.liftNull(Util.applyNullable(loverLocation, messageFun), lover);
   }
 
-  private Action eatPrey(final Set<ActorInfo> environment) {
+  private Action eatPrey(final ActorInfo self, final Set<ActorInfo> environment) {
     final String name = this.getClass().getName();
-    final ActorInfo prey = environment.stream()
-      .filter(a -> !Util.coalesce(a.getType(), "").equals(name))
-      .sorted((a1, a2) -> Double.compare(
-        Util.coalesce(a1.getDistance(), Double.MAX_VALUE),
-        Util.coalesce(a2.getDistance(), Double.MAX_VALUE)))
-      .findFirst().orElse(null);
+    final ActorInfo prey =
+        environment.stream().filter(a -> !Util.coalesce(a.getType(), "").equals(name))
+            .sorted((a1, a2) -> Double.compare(Util.coalesce(a1.getDistance(), Double.MAX_VALUE),
+                Util.coalesce(a2.getDistance(), Double.MAX_VALUE)))
+            .findFirst().orElse(null);
     if (prey == null) {
       return null;
     }
-    return Pairs.applyNullable(
-      Pairs.liftNull(prey.getDistance(), prey.getDirection()),
-      ConsumeAction::new);
+    System.out.println(self.getId() + " going after " + prey);
+    return Pairs.applyNullable(Pairs.liftNull(prey.getDistance(), prey.getDirection()),
+        ConsumeAction::new);
   }
 }

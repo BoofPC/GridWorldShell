@@ -22,9 +22,8 @@ public class ReportEvents {
     private final @NonNull Actor collidedWith;
     private final int direction;
 
-    public CollisionReportEvent(final Object source,
-      final @NonNull Actor collider, final @NonNull Actor collidedWith,
-      final int direction) {
+    public CollisionReportEvent(final Object source, final @NonNull Actor collider,
+        final @NonNull Actor collidedWith, final int direction) {
       super(source);
       this.collider = collider;
       this.collidedWith = collidedWith;
@@ -46,15 +45,13 @@ public class ReportEvents {
         final Actor collider = r.getCollider();
         final Grid<Actor> grid = collider.getGrid();
         final Location destLoc = collidedWith.getLocation();
-        final Location pushLoc =
-          Util.sanitize(destLoc.getAdjacentLocation(direction), grid);
+        final Location pushLoc = Util.sanitize(destLoc.getAdjacentLocation(direction), grid);
         if (destLoc.equals(pushLoc)) {
           return;
         }
         final Actor displaced = grid.get(pushLoc);
         if (displaced != null) {
-          that.report(
-            new CollisionReportEvent(that, collidedWith, displaced, direction));
+          that.report(new CollisionReportEvent(that, collidedWith, displaced, direction));
           return;
         }
         collidedWith.moveTo(pushLoc);
@@ -72,9 +69,8 @@ public class ReportEvents {
     private final double direction;
     private final Serializable message;
 
-    public MessageReportEvent(final Object source, final int senderId,
-      final int recipientId, final double distance, final double direction,
-      final Serializable message) {
+    public MessageReportEvent(final Object source, final int senderId, final int recipientId,
+        final double distance, final double direction, final Serializable message) {
       super(source);
       this.senderId = senderId;
       this.recipientId = recipientId;
@@ -94,8 +90,8 @@ public class ReportEvents {
         }
         final Double distance = r.getDistance();
         final Double direction = r.getDirection();
-        recipient.respond(new ActorEvents.MessageEvent(
-          "I see what you did there", message, distance, direction));
+        recipient.respond(
+            new ActorEvents.MessageEvent("I see what you did there", message, distance, direction));
       };
     }
   }
