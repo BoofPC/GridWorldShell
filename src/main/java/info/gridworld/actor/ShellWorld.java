@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 
 import info.gridworld.grid.Grid;
 import info.gridworld.grid.Location;
+import javafx.util.Pair;
 import lombok.Getter;
 import lombok.NonNull;
 
@@ -47,6 +49,7 @@ public class ShellWorld extends ActorWorld {
 
   private final @NonNull Watchman watchman = new Watchman(this);
   private final @NonNull Map<Integer, Shell> shells = new HashMap<>();
+  private final @NonNull Map<BiConsumer<ShellWorld, Pair<List<Actor>, AtomicReference<Object>>>, AtomicReference<Object>> onSteps;
 
   @Override
   public void add(final Location loc, final Actor occupant) {
@@ -75,13 +78,25 @@ public class ShellWorld extends ActorWorld {
         actor.act();
       }
     }
+    onSteps.forEach((k, v) -> k.accept(this, new Pair<>(actors, v)));
+  }
+  
+  public ShellWorld(final Grid<Actor> grid, final Iterable<BiConsumer<ShellWorld, Pair<List<Actor>, AtomicReference<Object>>>> onSteps) {
+    super(grid);
+    this.onSteps = new HashMap<>();
+    onSteps.forEach(f -> this.onSteps.put(f, new AtomicReference<>()));
   }
 
   public ShellWorld(final Grid<Actor> grid) {
-    super(grid);
+    this(grid, null);
   }
 
   public ShellWorld() {
     super();
+    this.onSteps = new HashMap<>();
+  }
+  
+  public static void clearMessage(final ShellWorld that, final Pair<List<Actor>, AtomicReference<Object>> data) {
+    that.setMessage("");
   }
 }

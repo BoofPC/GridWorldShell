@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -28,7 +29,7 @@ import javafx.util.Pair;
 public class CashGrabRunner {
   public static void main(final String[] args) {
     final Grid<Actor> grid = new BoundedGrid<>(50, 50);
-    final ShellWorld world = new ShellWorld(grid);
+    final ShellWorld world = new ShellWorld(grid, Arrays.asList(ShellWorld::clearMessage, CashGrab::coinMessage));
     world.getWatchman()
       .addImpl(CollisionReportEvent.class, CollisionReportEvent.impl())
       .addImpl(MessageReportEvent.class, MessageReportEvent.impl());
@@ -53,7 +54,7 @@ public class CashGrabRunner {
         .genShells(world, id, Stream.generate(CalebBug::new).limit(15),
           baseImpls)
         .map(s -> s.tag(CashGrab.Tags.BANK,
-          new Pair<>(bank, bankId.getAndUpdate(n -> n + 1)))));
+          new Pair<>(bank, bankId.getAndUpdate(n -> n + 1))).tag(CashGrab.Tags.SHOW_SCORE, true)));
     Util.scatter(world,
       players.build().filter(a -> a instanceof Shell).map(a -> (Shell) a)
         .filter(s -> s.getBrain() instanceof CalebBug)
