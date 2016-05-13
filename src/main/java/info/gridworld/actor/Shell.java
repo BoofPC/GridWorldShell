@@ -17,6 +17,7 @@ import javafx.util.Pair;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 public class Shell extends Actor {
   @Getter
@@ -37,6 +38,9 @@ public class Shell extends Actor {
       new HashMap<>();
   @Getter
   private final @NonNull Map<String, Object> tags = new HashMap<>();
+  @Getter
+  @Setter
+  private double sightRadius = 3;
 
   public Shell(final int id, final @NonNull ActorListener brain, final @NonNull Watchman watchman) {
     this.id = id;
@@ -100,7 +104,6 @@ public class Shell extends Actor {
     final double myDirection = this.getDirection();
     final Location myLoc = this.getLocation();
     final Pair<Double, Double> myLocRect = Util.locToRect(myLoc);
-    final double sightRadius = 3;
     Util.actorsInRadius(this, sightRadius).forEach(actor -> {
       Class<?> actorType_;
       if (actor instanceof Shell) {
