@@ -178,10 +178,12 @@ public class Util {
     return a == null ? null : fun.apply(a);
   }
 
-  public <A> void applyNullable(final A a, final Consumer<A> fun) {
+  public <A> boolean applyNullable(final A a, final Consumer<A> fun) {
     if (a != null) {
       fun.accept(a);
+      return true;
     }
+    return false;
   }
 
   public <A, B> B applyNullableOrDefault(final A a, final Function<A, B> fun,
@@ -193,10 +195,12 @@ public class Util {
     return (a == null || b == null) ? null : fun.apply(a, b);
   }
 
-  public <A, B> void applyNullable(final A a, final B b, final BiConsumer<A, B> fun) {
+  public <A, B> boolean applyNullable(final A a, final B b, final BiConsumer<A, B> fun) {
     if (a != null && b != null) {
       fun.accept(a, b);
+      return true;
     }
+    return false;
   }
 
   public <A, B, C> C applyNullableOrDefault(final A a, final B b, final BiFunction<A, B, C> fun,
@@ -276,6 +280,10 @@ public class Util {
     return Util.Pairs.thread(to, from, (x, y) -> x - y);
   }
 
+  public static double locDist(Location a, Location b) {
+    return Math.sqrt(Math.pow(a.getCol() - b.getCol(), 2) + Math.pow(a.getRow() - b.getRow(), 2));
+  }
+
   public Shell genShell(final ShellWorld world, final AtomicReference<Integer> id,
       final ActorListener brain) {
     return new Shell(id.getAndUpdate(x -> x + 1), brain, world.getWatchman());
@@ -317,5 +325,10 @@ public class Util {
     final Stream<Shell> generatedShells =
         genShells(world, id, brains, baseImpls).map(modifiers.reduce(f -> f, Function::andThen));
     Util.scatter(world, generatedShells);
+  }
+
+  public <T> boolean ifPresent_(final Optional<T> optional, final Consumer<T> consumer) {
+    optional.ifPresent(consumer);
+    return optional.isPresent();
   }
 }

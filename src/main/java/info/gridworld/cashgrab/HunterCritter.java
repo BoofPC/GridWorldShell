@@ -1,135 +1,127 @@
 package info.gridworld.cashgrab;
 
 import java.awt.Color;
-import java.io.Serializable;
+import java.util.Optional;
+import java.util.Random;
 import java.util.Set;
-import java.util.UUID;
-import java.util.function.Function;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import info.gridworld.actor.Action;
 import info.gridworld.actor.Actions.ColorAction;
-import info.gridworld.actor.Actions.MessageAction;
+import info.gridworld.actor.Actions.MoveAction;
+import info.gridworld.actor.Actions.TurnAction;
 import info.gridworld.actor.ActorEvent;
 import info.gridworld.actor.ActorEvent.ActorInfo;
-import info.gridworld.actor.ActorEvents.MessageEvent;
 import info.gridworld.actor.ActorEvents.StepEvent;
 import info.gridworld.actor.ActorListener;
 import info.gridworld.actor.Util;
-import info.gridworld.actor.Util.Either;
 import info.gridworld.actor.Util.Pairs;
 import info.gridworld.cashgrab.Actions.ConsumeAction;
-import javafx.util.Pair;
-import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
 
-@Data
+@RequiredArgsConstructor
 public class HunterCritter implements ActorListener {
-  public static final int BABY_TIME = 30;
+  public static final int BABY_WAIT = 20;
 
-  @Value
-  public static class MatingCall implements Serializable {
-    @Value
-    public static class Info implements Serializable {
-      private static final long serialVersionUID = 1L;
-      UUID uuid;
-      Integer id;
-      Double mateDirection;
-      Double mateDistance;
-      Double mateId;
-    }
+  @Getter
+  private final boolean female;
 
-    private static final long serialVersionUID = 1L;
-    Info info;
-    boolean isFemale;
-    int pass;
-  }
-
-  private final boolean isFemale;
   private boolean firstRun = true;
-  private int time = 0;
-  private int lastBaby = 0;
-  private MatingCall.Info mate = null;
-  private final UUID uuid = UUID.randomUUID();
+  private AtomicInteger lastBaby = new AtomicInteger(0);
 
   @Override
-  public Stream<Action> eventResponse(final ActorEvent e, final ActorInfo self,
-      final Set<ActorInfo> environment) {
+  public Stream<Action> eventResponse(ActorEvent e, ActorInfo self, Set<ActorInfo> environment) {
+    if (e instanceof StepEvent)
+      return stepResponse(e, self, environment);
+    return null;
+  }
+
+  public Stream<Action> stepResponse(ActorEvent e, ActorInfo self, Set<ActorInfo> environment) {
     final Stream.Builder<Action> actions = Stream.builder();
-    if (e instanceof MessageEvent) {
-      final Serializable message_ = ((MessageEvent) e).getMessage();
-      matingCall: if (message_ instanceof MatingCall) {
-        final MatingCall message = (MatingCall) message_;
-        if (this.time >= HunterCritter.BABY_TIME) {
-          if (this.mate != null) {
-            if (!this.mate.getUuid().equals(message.getInfo().getUuid())) {
-              break matingCall;
-            }
-          }
-        }
-      }
-    } else if (e instanceof StepEvent) {
-      finalAction: {
-        if (this.firstRun) {
-          actions.add(new ColorAction(Color.ORANGE));
-        }
-        this.time++;
-        this.lastBaby++;
-        if (this.lastBaby > HunterCritter.BABY_TIME) {
-          if (this.mate != null) {
-            break finalAction;
-          }
-          final Pair<Action, ActorInfo> courtAction = this.court(self, environment);
-          if (courtAction != null) {
-            //mate = Optional.of(courtAction.get());
-            actions.add(courtAction.getKey());
-          }
-        }
-        final Action eatAction = this.eatPrey(self, environment);
-        if (eatAction != null) {
-          actions.add(eatAction);
-          break finalAction;
-        }
-        /*if (Math.random() < 0.5) {
-          actions.add(new TurnAction(-1));
-        } else {
-          actions.add(new TurnAction(1));
-        }
-        actions.add(new MoveAction(1));*/
-        break finalAction;
-      }
+    final Consumer<Stream<Action>> addActs = s -> s.forEach(actions::add);
+    if (!(firstRun = !firstRun)) {
+      actions.add(new ColorAction(Color.ORANGE));
+    }
+    dispatch: {
+      if (Util.applyNullable(HunterCritter.mate(lastBaby), addActs))
+        break dispatch;
+      if (Util.applyNullable(HunterCritter.hunt(self.getId(), environment), addActs))
+        break dispatch;
+      if (Util.applyNullable(HunterCritter.coinCamp(self.getId(), environment), addActs))
+        break dispatch;
+      Util.applyNullable(HunterCritter.wander(), addActs);
+    }
+    lastBaby.incrementAndGet();
+    return actions.build();
+  }
+
+  public static Stream<Action> mate(final AtomicInteger lastBaby) {
+    if (BABY_WAIT > lastBaby.get())
+      return null;
+    return null; //Stream.of();
+  }
+
+  public static Stream<Action> hunt(final int id, final Set<ActorInfo> env) {
+    final ActorInfo prey = env.stream().filter(a -> {
+      final String type = Util.coalesce(a.getType(), "");
+      return !(type.equals(HunterCritter.class.getName()) || type.equals(Coin.class.getName()));
+    }).sorted((a1, a2) -> Double.compare(Util.coalesce(a1.getDistance(), Double.MAX_VALUE),
+        Util.coalesce(a2.getDistance(), Double.MAX_VALUE))).findFirst().orElse(null);
+    if (prey == null) {
+      return null;
+    }
+    System.out.println(id + " going after " + prey);
+    final Stream.Builder<Action> actions = Stream.builder();
+    if (Math.round(prey.getDistance()) <= 1) {
+      actions.add(Pairs.applyNullable(Pairs.liftNull(prey.getDistance(), prey.getDirection()),
+          ConsumeAction::new));
+    } else {
+      actions.add(new TurnAction((int) Math.round(prey.getDirection() / 45.0)));
+      actions.add(new MoveAction(1));
     }
     return actions.build();
   }
 
-  private Pair<Action, ActorInfo> court(final ActorInfo self, final Set<ActorInfo> environment) {
-    final String name = this.getClass().getName();
-    final ActorInfo lover = environment.stream()
-        .filter(a -> Util.coalesce(a.getType(), "").equals(name)).findAny().orElse(null);
-    if (lover == null) {
-      return null;
-    }
-    final Pair<Double, Double> loverLocation =
-        Pairs.liftNull(lover.getDistance(), lover.getDirection());
-    final Function<Pair<Double, Double>, MessageAction> messageFun =
-        p -> new MessageAction(Either.right(Either.right(p)), "hey baby");
-    return Pairs.liftNull(Util.applyNullable(loverLocation, messageFun), lover);
-  }
-
-  private Action eatPrey(final ActorInfo self, final Set<ActorInfo> environment) {
-    final String name = this.getClass().getName();
-    final ActorInfo prey =
-        environment.stream().filter(a -> !Util.coalesce(a.getType(), "").equals(name))
+  public static Stream<Action> coinCamp(final int id, final Set<ActorInfo> env) {
+    final ActorInfo coin =
+        env.stream().filter(a -> (Util.coalesce(a.getType(), "").equals(Coin.class.getName())))
             .sorted((a1, a2) -> Double.compare(Util.coalesce(a1.getDistance(), Double.MAX_VALUE),
                 Util.coalesce(a2.getDistance(), Double.MAX_VALUE)))
             .findFirst().orElse(null);
-    if (prey == null) {
+    if (coin == null) {
       return null;
     }
-    System.out.println(self.getId() + " going after " + prey);
-    return Pairs.applyNullable(Pairs.liftNull(prey.getDistance(), prey.getDirection()),
-        ConsumeAction::new);
+    final Stream.Builder<Action> actions = Stream.builder();
+    final double dist = coin.getDistance();
+    final double dir = coin.getDirection();
+    final int dirOffset = (int) Math.round(dir / 45.0);
+    if (Math.round(dist) > 1) {
+      // approach
+      actions.add(new TurnAction(dirOffset));
+    } else {
+      System.out.println(id + " is juking out coins");
+      // circle
+      final Optional<ActorInfo> lastBlocker =
+          env.stream().filter(a -> Math.abs(a.getDistance()) < Math.sqrt(2) + 0.1)
+              .sorted((a, b) -> -Double.compare(a.getDirection() % 360, b.getDirection() % 360))
+              .findFirst();
+      actions.add(new TurnAction(
+          (int) Math.round(lastBlocker.map(ActorInfo::getDirection).orElse(dir) / 45.0) - 1));
+    }
+    actions.add(new MoveAction(1));
+    return actions.build();
+  }
+
+  public static Stream<Action> wander() {
+    final int turn = new Random().nextInt(3) - 1;
+    final Stream.Builder<Action> actions = Stream.builder();
+    if (turn != 0) {
+      actions.add(new TurnAction(turn));
+    }
+    actions.add(new MoveAction(1));
+    return actions.build();
   }
 }

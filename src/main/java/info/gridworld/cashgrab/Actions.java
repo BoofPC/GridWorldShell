@@ -113,14 +113,19 @@ public class Actions {
       return true;
     }
 
+    /**
+     * Example implementation of this Action in a world.
+     * 
+     * maxDist is checked by {@link Math#round(double)}.
+     */
     public static BiConsumer<Shell, Action> impl(final int maxDist) {
       return (final Shell that, final Action a) -> {
         if (!((boolean) that.getTagOrDefault(CashGrab.Tags.PREDATOR, false))) {
           System.out.println(that.getId() + " not a pred");
           return;
         }
-        final Location loc = that.getLocation();
         final ConsumeAction ca = ((ConsumeAction) a);
+        final Location loc = that.getLocation();
         final Grid<Actor> grid = that.getGrid();
         final Pair<Double, Double> offsets = Util.polarToRect(ca.getDistance(),
             Util.polarRight(Math.toRadians(that.getDirection() + ca.getDirection())));
@@ -130,6 +135,10 @@ public class Actions {
         System.out.print(that.getId() + " going for " + preyLoc + ", ");
         final Location cleanPreyLoc = Util.sanitize(preyLoc, grid);
         System.out.print("got " + cleanPreyLoc + ", ");
+        if (Math.round(Util.locDist(loc, cleanPreyLoc)) > maxDist) {
+          System.out.println("too far");
+          return;
+        }
         final Actor prey = grid.get(cleanPreyLoc);
         if (prey == null) {
           System.out.println("nothing to eat");

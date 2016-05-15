@@ -58,10 +58,13 @@ task javadocJar(type: Zip, dependsOn: javadoc) {
 distributions {
     main {
         contents {
-            from({ 'build/libs/gridworld-shell.jar' },
-                 { 'build/distributions/gridworld-shell-javadoc.jar' },
-                 { 'src/delombok/java/CashGrabRunner.java' },
-                 { 'src/delombok/java/info/gridworld/cashgrab/CalebBug.java' })
+            from('build/libs/gridworld-shell.jar',
+                 'build/distributions/gridworld-shell-javadoc.jar',
+                 'src/delombok/java/CashGrabRunner.java')
+            with {	
+                from 'src/delombok/java/info/gridworld/cashgrab/CalebBug.java'
+                filter(org.apache.tools.ant.filters.HeadFilter, lines:-1, skip:2)
+            }
         }
     }
 }

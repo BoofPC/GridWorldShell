@@ -113,9 +113,11 @@ public class Shell extends Actor {
       }
       final Class<?> actorType = actorType_;
       final ActorInfo.ActorInfoBuilder actorInfo = ActorInfo.builder().type(actorType.getName());
+      /*
       if (actor instanceof Shell) {
         actorInfo.id(((Shell) actor).getId());
       }
+      */
       final Location actorLoc = actor.getLocation();
       final Pair<Double, Double> actorLocRect = Util.locToRect(actorLoc);
       final Pair<Double, Double> offset = Util.rectOffset(myLocRect, actorLocRect);
@@ -134,7 +136,7 @@ public class Shell extends Actor {
     if (this.nextActions == null) {
       return;
     }
-    for (final Action a : (Iterable<Action>) this.nextActions::iterator) {
+    for (final Action a : (Iterable<Action>) this.nextActions.sequential()::iterator) {
       if (a == null) {
         continue;
       }
